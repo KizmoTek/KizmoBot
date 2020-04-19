@@ -34,20 +34,6 @@ const config = require("./config.json"); //Requires the config file
 
 client.commands = new Discord.Collection();
 
-var cf = require('cloudflare')({
-    email: 'miketikel7@gmail.com',
-    key: '4e51a2628c6300222d69ca032859628f1cbe9'
-});
-
-getZoneStatus()
-
-async function getZoneStatus() {
-    var resp = await cf.zones.read('06114900852ca542390d836d4eb9d703');
-    return resp.result.status;
-}
-  
-var webStatus = getZoneStatus()
-
 client.on("ready", () => {
   console.log(`KizmoBot is running, you better go catch it.`);
   webStatus.then(function(value) {
