@@ -37,7 +37,7 @@ client.commands = new Discord.Collection();
 client.on("ready", () => {
   console.log(`KizmoBot is running, you better go catch it.`);
 
-  client.user.setActivity("On " + client.guilds.size + " servers!");
+  client.user.setActivity("on " + client.guilds.size + " servers!");
 });
 
 client.on("message", async message => {
@@ -59,10 +59,15 @@ var notModerator = "You do not have permission to run this command, type /help i
 
 client.on('error', console.error);
 
-setInterval(function(){
-      client.user.setActivity("on " + client.guilds.size + " servers!");
-}, 60000);
 
+
+setInterval(function(){
+  var activites = ["on " + client.guilds.size + " servers!", `/help or /support`]
+  let activity = activites[Math.floor(Math.random() * activites.length)]
+  client.user.setActivity(activity, {type: "PLAYING"});
+}, 20000);
+
+//Custom code for KizmoTek server
 client.on('raw', event => {
   const eventName = event.t;
 
@@ -261,23 +266,23 @@ client.on('message', async message => {
         }
     }
 
-    if(command === "help") {
-      if(!message.member.roles.some(r=>adminRoles.includes(r.name)) ) {
-        message.author.send("Here are the list of commands so far integrated into the bot, you must have a role with one of these names to use them: \n/ban @user *reason* \n/kick @user *reason* \n/warn @user reason \n/clear @user *amount of replies to remove* (This will delete up to 100 replies from the person you specify.)\n/help \n\n If the bot runs into any issues/bugs or you need help setting it up, please join the official KizmoBot discord server: https://discord.gg/h2vzfKn")
-        .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
-        message.delete(1);
-      }
-      else {
-        message.author.send("You do not have any commands to use. If this is incorrect, please add a role to yourself that has one of these names: Owner, Leader, Creator, Admin, Administrator, Mod, Mods, Moderator, BotCommand or BC.")
-        .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
-        message.delete(1);
-      }
-    }
-
     if(command === "support") {
         message.author.send("If you need help setting up the bot or have issues, please join the official KizmoBot discord server: https://discord.gg/h2vzfKn")
         .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
         message.delete(1);
+    }
+
+    if(command === "help") {
+      if(!message.member.roles.some(r=>adminRoles.includes(r.name)) ) {
+        message.author.send("You do not have any commands to use. If this is incorrect, please add a role to yourself that has one of these names: Owner, Leader, Creator, Admin, Administrator, Mod, Mods, Moderator, BotCommand or BC.\nIf you need help setting up the bot, join the official KizmoBot discord server: https://discord.gg/h2vzfKn")
+        .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
+        message.delete(1);
+      }
+      else { /* \n/clear @user *amount of replies to remove* (This will delete up to 100 replies from the person you specify.) */
+        message.author.send("Here are the list of commands so far integrated into the bot, you must have a role with one of these names to use them: \n/ban @user *reason* \n/kick @user *reason* \n/warn @user reason \n/help \n\n If the bot runs into any issues/bugs or you need help setting it up, please join the official KizmoBot discord server: https://discord.gg/h2vzfKn")
+        .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
+        message.delete(1);
+      }
     }
     
     if(command === "warn") {
@@ -334,7 +339,7 @@ client.on('message', async message => {
       //   }
       // }
 
-      if(command === "feedback") {
+      if(command === "feedback") { //Custom code for KizmoTek server
             let feedback = args.slice(0).join(' ');
             let originalAuthor = message.author.id
 
