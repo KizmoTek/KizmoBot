@@ -36,9 +36,8 @@ client.commands = new Discord.Collection();
 
 client.on("ready", () => {
   console.log(`KizmoBot is running, you better go catch it.`);
-  webStatus.then(function(value) {
-      client.user.setActivity(`web status: ` + value, { type: 'Watching' });
-  })
+
+  client.user.setActivity("On " + client.guilds.size + " servers!");
 });
 
 client.on("message", async message => {
@@ -54,12 +53,14 @@ client.on("message", async message => {
 
 });
 
+var adminRoles = ["owner", "Owner", "leader", "Leader", "creator", "Creator", "admin", "Admin", "administrator", "Administrator", "mod", "Mod", "mods", "Mods", "moderator", "Moderator", "BotCommand", "botCommand", "botcommand", "bc", "BC"]
+
+var notModerator = "You do not have permission to run this command, type /help in the server to see what roles you need to use the bots commands."
+
 client.on('error', console.error);
 
 setInterval(function(){
-    webStatus.then(function(value) {
-        client.user.setActivity(`web status: ` + value, { type: 'Watching' });
-    })
+      client.user.setActivity("on " + client.guilds.size + " servers!");
 }, 60000);
 
 client.on('raw', event => {
@@ -185,8 +186,8 @@ client.on('message', async message => {
   const command = args.shift().toLowerCase();
 
   if(command === "kick") {
-    if(!message.member.roles.some(r=>["Mods", "Owner"].includes(r.name)) ){
-      message.author.send("You are not a moderator, please do not attempt to run commands.")
+    if(!message.member.roles.some(r=>adminRoles.includes(r.name)) ){
+      message.author.send(notModerator)
       .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
       message.delete(1);
     }
@@ -195,20 +196,20 @@ client.on('message', async message => {
         let member = message.mentions.members.first() || message.guild.members.get(args[0]);
         
         if(!member){
-          message.delete(1);  
-          return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Please mention a valid member of this server.`);
+          message.delete(1);
+            return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Please mention a valid member of this server.`);
           }
           
           if(!member.kickable) {
             message.delete(1);
-            return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Unable to kick user.`);
+              return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Unable to kick user.`);
           }
           
           let reason = args.slice(1).join(' ');
         
           if(!reason){
             message.delete(1);
-            return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Please provide a reason.`);
+              return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Please provide a reason.`);
           }
           message.delete(1);
           member.send(`You have been kicked from the server by <@${message.author.id}> because: ${reason}`)
@@ -217,13 +218,13 @@ client.on('message', async message => {
           setTimeout(() => {
             member.kick(reason)
             .catch(error => message.guild.channels.find(channel => channel.name === "bot-logs").send(`Sorry ${message.author} I couldn't kick because of : ${error}`));
-          }, 1000); 
+          }, 100); 
           message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${member.user.id}> has been kicked by <@${message.author.id}> because: ${reason}`);
       }
     }
 
     if(command === "ban") {
-      if(!message.member.roles.some(r=>["Mods", "Owner"].includes(r.name)) ) {
+      if(!message.member.roles.some(r=>adminRoles.includes(r.name)) ) {
         message.author.send("You are not a moderator, please do not attempt to run commands.")
         .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
         message.delete(1);
@@ -254,28 +255,34 @@ client.on('message', async message => {
           setTimeout(() => {
             member.ban(reason)
             .catch(error => message.guild.channels.find(channel => channel.name === "bot-logs").send(`Sorry ${message.author} I couldn't ban because of : ${error}`));
-          }, 1000);
+          }, 100);
           
           message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${member.user.id}> has been banned by <@${message.author.id}> because: ${reason}`);
         }
     }
 
     if(command === "help") {
-      if(!message.member.roles.some(r=>["Mods", "Core Team", "Owner", "Admins", "Captain"].includes(r.name)) ) {
-        message.author.send("Here are the list of commands so far integrated into the bot: \n/ban @user *reason* \n/kick @user *reason* \n/warn @user reason \n/prune @user *amount of replies to remove* (This will delete up to 100 replies from the person you specify.)\n/airdrop @user (links the tagged user to the guide on how to claim airdrop)\n/defrag @user (links the tagged user to a website that talks about defragmented transactions) \n/help \n\n If the bot runs into any issues/bugs or crashes/turns off, please message @KizmoTek#3404 with the issue as well as what time it happened.")
+      if(!message.member.roles.some(r=>adminRoles.includes(r.name)) ) {
+        message.author.send("Here are the list of commands so far integrated into the bot, you must have a role with one of these names to use them: \n/ban @user *reason* \n/kick @user *reason* \n/warn @user reason \n/clear @user *amount of replies to remove* (This will delete up to 100 replies from the person you specify.)\n/help \n\n If the bot runs into any issues/bugs or you need help setting it up, please join the official KizmoBot discord server: https://discord.gg/h2vzfKn")
         .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
         message.delete(1);
       }
       else {
-        message.author.send("There is nothing setup for this command yet.")
+        message.author.send("You do not have any commands to use. If this is incorrect, please add a role to yourself that has one of these names: Owner, Leader, Creator, Admin, Administrator, Mod, Mods, Moderator, BotCommand or BC.")
         .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
         message.delete(1);
       }
     }
+
+    if(command === "support") {
+        message.author.send("If you need help setting up the bot or have issues, please join the official KizmoBot discord server: https://discord.gg/h2vzfKn")
+        .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
+        message.delete(1);
+    }
     
     if(command === "warn") {
-      if(!message.member.roles.some(r=>["Mods", "Owner"].includes(r.name)) ) {
-        message.author.send("You are not a moderator, please do not attempt to run commands.")
+      if(!message.member.roles.some(r=>adminRoles.includes(r.name)) ) {
+        message.author.send(notModerator)
         .catch(error => console.log(`Unable to message ${message.author}> because of: ${error}`))
         message.delete(1);
       }
@@ -299,28 +306,33 @@ client.on('message', async message => {
         }
       }
 
-      if(command === "prune") {
-        if(!message.member.roles.some(r=>["Mods", "Owner"].includes(r.name)) ) {
-          message.author.send("You are not a moderator, please do not attempt to run commands.")
-          .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
-          message.delete(1);
-        }
-        else{
-          let member = message.mentions.members.first();
-          const deleteCount = parseInt(args[1], 10);
-          var currentCount = 0;
-          message.delete(1);
-          if(!deleteCount || deleteCount < 2 || deleteCount > 100){
-            return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Please provide a number between 2 and 100 for the number of messages to delete.`);
-          }
+      // if(command === "clear" || command === "prune") {
+      //   if(!message.member.roles.some(r=>adminRoles.includes(r.name)) ) {
+      //     message.author.send("You are not a moderator, please do not attempt to run commands.")
+      //     .catch(error => console.log(`Unable to message ${message.author} because of: ${error}`))
+      //     message.delete(1);
+      //   }
+      //   else{
+      //     let member = message.mentions.members.first();
+      //     const deleteCount = parseInt(args[1], 10);
+      //     var currentCount = 0;
+      //     message.delete(1);
+      //     if(!deleteCount || deleteCount < 2 || deleteCount > 100){
+      //       return message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, Please provide a number between 2 and 100 for the number of messages to delete.`);
+      //     }
           
-          const fetched = await message.channel.fetchMessages({limit: 100});
-          let msg_array = fetched.array();
+      //     //const fetched = await message.channel.fetchMessages({limit: 100});
+      //     //let msg_array = fetched.array();
 
-          msg_array = msg_array.filter(m => {if(currentCount < deleteCount){if(m.author.id === member.id){currentCount += 1; return true}}return false})
-          msg_array.map(m => m.delete().catch(error => message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, I couldn't prune messages because of: ${error}`)))
-        }
-      }
+      //     //msg_array = msg_array.filter(m => {if(currentCount < deleteCount){if(m.author.id === member.id){currentCount += 1; return true}}return false})
+      //     //msg_array.map(m => m.delete().catch(error => message.guild.channels.find(channel => channel.name === "bot-logs").send(`<@${message.author.id}>, I couldn't prune messages because of: ${error}`)))
+      //     await message.channel.fetchMessages({ limit: deleteCount }).then(messages => { // Fetches the messages
+      //       message.channel.bulkDelete(messages // Bulk deletes all messages that have been fetched and are not older than 14 days (due to the Discord API)
+      //       .catch(error => console.log(`Unable to delete messages from ${message.author} because of: ${error}`))
+      //   )});
+        
+      //   }
+      // }
 
       if(command === "feedback") {
             let feedback = args.slice(0).join(' ');
